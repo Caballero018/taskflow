@@ -19,6 +19,13 @@ class AppTheme {
 
   static ThemeData light() {
     final colorScheme = ColorScheme.fromSeed(seedColor: seedColor);
+    // Tipografía base de Material 3. Los estilos personalizados se derivan de
+    // ella con copyWith para conservar la familia tipográfica de la plataforma.
+    final textTheme = ThemeData(colorScheme: colorScheme).textTheme;
+    final buttonTextStyle = textTheme.labelLarge?.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    );
     final roundedShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),
     );
@@ -32,9 +39,8 @@ class AppTheme {
         foregroundColor: colorScheme.onSurface,
         centerTitle: false,
         scrolledUnderElevation: 2,
-        titleTextStyle: TextStyle(
+        titleTextStyle: textTheme.titleLarge?.copyWith(
           color: colorScheme.onSurface,
-          fontSize: 22,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -60,14 +66,14 @@ class AppTheme {
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
           shape: roundedShape,
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: buttonTextStyle,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
           shape: roundedShape,
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: buttonTextStyle,
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
