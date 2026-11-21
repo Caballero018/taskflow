@@ -2,6 +2,15 @@
 # Se parte de las reglas recomendadas por Flutter (flutter_lints) y se agregan
 # algunas que refuerzan las convenciones del proyecto: tipos explícitos en
 # retornos, uso de final/const y comillas simples.
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
