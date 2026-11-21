@@ -49,7 +49,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
+    // hideCurrentSnackBar: el aviso nuevo reemplaza al anterior en vez de
+    // esperar en cola.
+    final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
     try {
       final task = widget.taskService.create(
         title: _titleController.text,

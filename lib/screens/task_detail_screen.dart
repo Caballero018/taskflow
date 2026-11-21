@@ -68,13 +68,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     if (confirmed != true || !mounted) return;
 
     final deleted = widget.taskService.delete(task.id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          deleted ? 'Tarea "${task.title}" eliminada' : 'La tarea ya no existe',
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            deleted
+                ? 'Tarea "${task.title}" eliminada'
+                : 'La tarea ya no existe',
+          ),
         ),
-      ),
-    );
+      );
     // Regresa al listado, que se actualiza al recuperar el control.
     Navigator.pop(context);
   }
@@ -129,7 +133,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionLabel(icon: Icons.notes, text: 'Descripción'),
+                const _SectionLabel(icon: Icons.notes, text: 'Descripción'),
                 const SizedBox(height: 8),
                 Text(task.description, style: theme.textTheme.bodyLarge),
               ],

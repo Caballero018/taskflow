@@ -4,6 +4,8 @@ import '../models/task.dart';
 import '../services/contracts/task_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/task_tile.dart';
+import 'task_detail_screen.dart';
+import 'task_form_screen.dart';
 
 /// Pantalla principal: resumen y listado de tareas.
 ///
@@ -27,12 +29,38 @@ class _TaskListScreenState extends State<TaskListScreen> {
     setState(() => widget.taskService.toggleCompleted(task.id));
   }
 
+  /// Navegación al formulario.
+  /// `Navigator.push` apila una nueva pantalla y devuelve un `Future` que se
+  /// completa cuando esa pantalla hace `Navigator.pop`. El servicio se pasa
+  /// por constructor a la siguiente pantalla (inyección de dependencias).
   Future<void> _openCreateForm() async {
-    // Se conecta con TaskFormScreen en la etapa de navegación.
+    final createdTask = await Navigator.push<Task>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TaskFormScreen(taskService: widget.taskService),
+      ),
+    );
+
+    // Si el usuario canceló, el resultado es null y no hay nada que redibujar.
+    if (createdTask != null && mounted) {
+      setState(() {});
+    }
   }
 
+  /// Navegación al detalle. Solo se envía el id: el detalle consulta la
+  /// tarea al servicio y así siempre ve los datos actuales.
   Future<void> _openDetail(Task task) async {
-    // Se conecta con TaskDetailScreen en la etapa de navegación.
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            TaskDetailScreen(taskService: widget.taskService, taskId: task.id),
+      ),
+    );
+
+    // En el detalle la tarea pudo completarse o eliminarse: al volver se
+    // redibuja el listado para reflejar esos cambios.
+    if (mounted) setState(() {});
   }
 
   @override
@@ -221,18 +249,27 @@ class _CounterItem extends StatelessWidget {
       children: [
         Icon(icon, color: color),
         const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$value',
-              style: textTheme.headlineSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
+        // Expanded + ellipsis: en pantallas angostas el texto se recorta en
+        // lugar de desbordar la fila (diseño adaptable).
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$value',
+                style: textTheme.headlineSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            Text(label, style: textTheme.labelMedium?.copyWith(color: color)),
-          ],
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.labelMedium?.copyWith(color: color),
+              ),
+            ],
+          ),
         ),
       ],
     );
