@@ -1,0 +1,15 @@
+# Reglas de análisis estático de TaskFlow.
+# Se parte de las reglas recomendadas por Flutter (flutter_lints) y se agregan
+# algunas que refuerzan las convenciones del proyecto: tipos explícitos en
+# retornos, uso de final/const y comillas simples.
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    always_declare_return_types: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    prefer_const_constructors: true
+    prefer_single_quotes: true
+    sort_child_properties_last: true
+    use_super_parameters: true
