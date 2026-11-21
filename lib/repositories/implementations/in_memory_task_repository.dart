@@ -9,7 +9,7 @@ import '../contracts/task_repository.dart';
 class InMemoryTaskRepository implements TaskRepository {
   /// Constructor opcional con tareas iniciales (útil en pruebas).
   InMemoryTaskRepository({List<Task> initialTasks = const []})
-      : _tasks = List<Task>.of(initialTasks);
+    : _tasks = List<Task>.of(initialTasks);
 
   /// Colección interna. Es privada (`_`) para que nadie fuera de esta clase
   /// pueda modificarla directamente.

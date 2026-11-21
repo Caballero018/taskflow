@@ -24,8 +24,7 @@ class TaskValidator {
       maxLength: titleMaxLength,
       requiredMessage: 'El título es obligatorio.',
       blankMessage: 'El título no puede contener solo espacios.',
-      tooLongMessage:
-          'El título no puede superar $titleMaxLength caracteres.',
+      tooLongMessage: 'El título no puede superar $titleMaxLength caracteres.',
     );
   }
 

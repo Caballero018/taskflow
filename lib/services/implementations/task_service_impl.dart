@@ -15,7 +15,7 @@ class TaskServiceImpl implements TaskService {
   /// [clock] permite fijar la fecha en las pruebas; por defecto es la hora
   /// actual.
   TaskServiceImpl(this._taskRepository, {DateTime Function()? clock})
-      : _clock = clock ?? DateTime.now;
+    : _clock = clock ?? DateTime.now;
 
   final TaskRepository _taskRepository;
   final DateTime Function() _clock;
@@ -89,7 +89,8 @@ class TaskServiceImpl implements TaskService {
   }
 
   void _ensureValid({required String title, required String description}) {
-    final error = TaskValidator.validateTitle(title) ??
+    final error =
+        TaskValidator.validateTitle(title) ??
         TaskValidator.validateDescription(description);
     if (error != null) throw ArgumentError(error);
   }

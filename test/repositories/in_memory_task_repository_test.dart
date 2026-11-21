@@ -3,11 +3,11 @@ import 'package:taskflow/models/task.dart';
 import 'package:taskflow/repositories/implementations/in_memory_task_repository.dart';
 
 Task _task(String id) => Task(
-      id: id,
-      title: 'Tarea $id',
-      description: 'Descripción $id',
-      createdAt: DateTime(2026, 11, 21),
-    );
+  id: id,
+  title: 'Tarea $id',
+  description: 'Descripción $id',
+  createdAt: DateTime(2026, 11, 21),
+);
 
 void main() {
   late InMemoryTaskRepository repository;
