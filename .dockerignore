@@ -1,0 +1,44 @@
+# Archivos que NO se envían al contexto de construcción de Docker.
+# Menos archivos = construcción más rápida y una imagen sin basura local.
+
+# Control de versiones
+.git
+.gitignore
+
+# Herramientas y cachés de Dart/Flutter (se regeneran dentro del contenedor)
+.dart_tool
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache
+.pub
+build
+
+# IDEs y editores
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# Plataformas que no intervienen en la compilación web
+android
+ios
+linux
+macos
+windows
+
+# Pruebas (se ejecutan fuera del contenedor con `flutter test`)
+test
+coverage
+
+# Archivos de Docker (no forman parte de la app)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Temporales y del sistema operativo
+*.log
+*.swp
+*.tmp
+.DS_Store
+Thumbs.db

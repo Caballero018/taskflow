@@ -22,6 +22,8 @@ Proyecto desarrollado para una actividad del **ITM (Instituto Tecnológico Metro
 | `Form`, `GlobalKey<FormState>`, `TextFormField` | Formulario y validación |
 | `flutter_test` | Pruebas unitarias y de widgets |
 | `flutter_lints` | Análisis estático |
+| Docker + Docker Compose | Construcción y ejecución de la versión web en un contenedor |
+| Nginx (Alpine) | Servidor web de la compilación Flutter Web dentro del contenedor |
 
 La app **no tiene dependencias externas**: solo usa el SDK de Flutter y `cupertino_icons`, que viene en la plantilla. No usa Firebase, backend, base de datos ni librerías de gestión de estado. Las tareas se guardan **en memoria** y se pierden al cerrar la app.
 
@@ -89,6 +91,11 @@ test/
 ├── models/            validators/            repositories/            services/
 ├── screens/task_form_screen_test.dart        # Prueba de widget del formulario
 └── app_flow_test.dart                        # Flujo completo entre las tres pantallas
+
+Dockerfile             # Imagen multi-stage: compila Flutter Web y la sirve con Nginx
+docker-compose.yml     # Servicio taskflow-web (puerto 8080 → 80)
+nginx.conf             # Configuración de Nginx para Flutter Web (SPA)
+.dockerignore          # Archivos excluidos del contexto de construcción
 ```
 
 Frente a la estructura inicial se agregaron tres archivos pequeños:
@@ -147,7 +154,85 @@ flutter build apk              # Android (requiere Android SDK)
 flutter build web              # Web, el resultado queda en build/web
 ```
 
-## 9. Pruebas
+## 9. Ejecución con Docker Compose
+
+Además de `flutter run`, la versión web de TaskFlow se puede ejecutar dentro de un contenedor sin tener Flutter instalado en el equipo.
+
+### ¿Qué hace cada herramienta?
+
+- **Docker** empaqueta la aplicación y todo lo que necesita para ejecutarse en una *imagen*. A partir de ella crea un *contenedor*, un proceso aislado que funciona igual en cualquier equipo con Docker.
+- **Docker Compose** describe en `docker-compose.yml` cómo levantar el contenedor: qué imagen construir, qué puertos publicar y qué política de reinicio usar. Así todo se maneja con un solo comando, en lugar de escribir un `docker run` largo.
+- **Nginx** es el servidor web que corre dentro del contenedor. Entrega al navegador los archivos estáticos que genera `flutter build web` (HTML, JavaScript, WebAssembly, fuentes e íconos). Si alguien pide una ruta que no existe como archivo, Nginx responde con `index.html` para que Flutter muestre la pantalla correcta (navegación SPA).
+
+### Arquitectura Docker
+
+```
+Dockerfile (multi-stage)
+├── Etapa "build"  · debian:bookworm-slim + Flutter 3.47.4
+│     flutter pub get  →  flutter build web --release  →  /app/build/web
+└── Etapa "final"  · nginx:1.29-alpine
+      build/web → /usr/share/nginx/html     nginx.conf → /etc/nginx/conf.d/default.conf
+
+docker-compose.yml
+└── servicio taskflow-web  ·  contenedor "taskflow-web"  ·  puerto 8080 (equipo) → 80 (contenedor)
+      restart: unless-stopped  ·  healthcheck con wget a http://127.0.0.1/
+```
+
+El SDK de Flutter solo existe en la etapa de compilación, así que la imagen final contiene únicamente Nginx y la app ya compilada. Es el mismo patrón multi-stage que usa el `Dockerfile` de `my-vaccine-api` (`sdk` → `aspnet`).
+
+La app sigue guardando las tareas **en memoria del navegador**: el contenedor solo sirve archivos estáticos y no tiene backend ni base de datos.
+
+### Requisitos previos
+
+- [Docker Desktop](https://docs.docker.com/get-docker/) o Docker Engine con el plugin **Compose v2** (comando `docker compose`).
+- Conexión a internet en la primera construcción, para descargar las imágenes base y el SDK de Flutter.
+
+```bash
+docker --version
+docker compose version
+```
+
+### Construir y levantar
+
+Desde la carpeta raíz del proyecto (donde está `docker-compose.yml`):
+
+```bash
+docker compose up -d --build
+```
+
+- `--build` construye la imagen antes de iniciar el contenedor.
+- `-d` (*detached*) lo deja ejecutándose en segundo plano.
+
+La primera construcción tarda varios minutos porque descarga Flutter. Las siguientes reutilizan la caché de Docker.
+
+### Acceder a la aplicación
+
+Abre en el navegador: **http://localhost:8080**
+
+### Comandos útiles
+
+```bash
+docker compose ps          # estado del contenedor (debe aparecer "Up ... (healthy)")
+docker compose logs -f     # registros de Nginx en tiempo real (Ctrl+C para salir)
+docker compose down        # detiene y elimina el contenedor y su red
+```
+
+### Reconstruir después de cambios
+
+Cada vez que cambies el código (`lib/`, `pubspec.yaml`, `web/`, etc.), reconstruye la imagen y vuelve a crear el contenedor:
+
+```bash
+docker compose up -d --build
+```
+
+Para reconstruir desde cero sin usar la caché:
+
+```bash
+docker compose build --no-cache
+docker compose up -d
+```
+
+## 10. Pruebas
 
 ```bash
 flutter analyze                # análisis estático (sin incidencias)
@@ -163,7 +248,7 @@ flutter test                   # 31 pruebas
 | `test/screens/task_form_screen_test.dart` | **Prueba de widget del formulario:** errores debajo de los campos, revalidación, guardado con confirmación y cancelación |
 | `test/app_flow_test.dart` | Estado vacío, crear desde el botón flotante, completar desde el listado, detalle y cambio de estado, eliminar con confirmación, tarea inexistente y orden del listado |
 
-## 10. Relación entre la arquitectura del profesor y TaskFlow
+## 11. Relación entre la arquitectura del profesor y TaskFlow
 
 | `my-vaccine-api` (C# / ASP.NET Core) | TaskFlow (Dart / Flutter) |
 |---|---|
